@@ -94,7 +94,7 @@ if __name__ == "__main__":
     env = gym.envs.toy_text.frozen_lake.FrozenLakeEnv(is_slippery=False)
     env = gym.wrappers.TimeLimit(env, max_episode_steps=100)
     env = DiscreteOneHotWrapper(env)
-    # env = gym.wrappers.Monitor(env, directory="mon", force=True)
+    env = gym.wrappers.Monitor(env, directory="mon", force=True)
     obs_size = env.observation_space.shape[0]
     n_actions = env.action_space.n
 

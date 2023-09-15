@@ -10,3 +10,6 @@ __pycache__
 *.png
 *.pyc
 roboschool-files
+Chapter04/mon/*
+Chapter06/mon/*
+Chapter06/mon1/*

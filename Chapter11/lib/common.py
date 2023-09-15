@@ -58,7 +58,10 @@ class RewardTracker:
 
     def reward(self, reward, frame, epsilon=None):
         self.total_rewards.append(reward)
-        speed = (frame - self.ts_frame) / (time.time() - self.ts)
+        if (time.time() - self.ts) > 0.0:
+            speed = (frame - self.ts_frame) / (time.time() - self.ts)
+        else:
+            speed = 0.0
         self.ts_frame = frame
         self.ts = time.time()
         mean_reward = np.mean(self.total_rewards[-100:])

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import gym
+from gym import wrappers
 import ptan
 import argparse
 import numpy as np
@@ -40,7 +41,7 @@ VALIDATION_EVERY_STEP = 100000
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
+    parser.add_argument("--cuda", default=True, action="store_true", help="Enable cuda")
     parser.add_argument("--data", default=DEFAULT_STOCKS, help="Stocks file or dir to train on, default=" + DEFAULT_STOCKS)
     parser.add_argument("--year", type=int, help="Year to be used for training, if specified, overrides --data option")
     parser.add_argument("--valdata", default=DEFAULT_VAL_STOCKS, help="Stocks data for validation, default=" + DEFAULT_VAL_STOCKS)
@@ -130,3 +131,7 @@ if __name__ == "__main__":
                 res = validation.validation_run(env_val, net, device=device)
                 for key, val in res.items():
                     writer.add_scalar(key + "_val", val, step_idx)
+
+            # earlier stop
+            if step_idx > 1.0e7:
+                break

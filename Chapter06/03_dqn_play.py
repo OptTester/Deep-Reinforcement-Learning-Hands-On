@@ -20,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--model", required=True, help="Model file to load")
     parser.add_argument("-e", "--env", default=DEFAULT_ENV_NAME,
                         help="Environment name to use, default=" + DEFAULT_ENV_NAME)
-    parser.add_argument("-r", "--record", help="Directory to store video recording")
+    parser.add_argument("-r", "--record", default="./mon1", help="Directory to store video recording")
     parser.add_argument("--no-visualize", default=True, action='store_false', dest='visualize',
                         help="Disable visualization of the game play")
     args = parser.parse_args()

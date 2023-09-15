@@ -15,7 +15,7 @@ from tensorboardX import SummaryWriter
 
 
 DEFAULT_ENV_NAME = "PongNoFrameskip-v4"
-MEAN_REWARD_BOUND = 19.5
+MEAN_REWARD_BOUND = 12.0 # 19.5
 
 GAMMA = 0.99
 BATCH_SIZE = 32
@@ -81,6 +81,7 @@ class Agent:
         if is_done:
             done_reward = self.total_reward
             self._reset()
+        # return None if game is not finished
         return done_reward
 
 
@@ -91,9 +92,10 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
     next_states_v = torch.tensor(next_states).to(device)
     actions_v = torch.tensor(actions).to(device)
     rewards_v = torch.tensor(rewards).to(device)
-    done_mask = torch.ByteTensor(dones).to(device)
+    # done_mask = torch.ByteTensor(dones).to(device)
+    done_mask = torch.BoolTensor(dones).to(device)
 
-    state_action_values = net(states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
+    state_action_values = net(states_v).gather(1, actions_v.type(torch.int64).unsqueeze(-1)).squeeze(-1)
     next_state_values = tgt_net(next_states_v).max(1)[0]
     next_state_values[done_mask] = 0.0
     next_state_values = next_state_values.detach()
@@ -104,7 +106,7 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
+    parser.add_argument("--cuda", default=True, action="store_true", help="Enable cuda")
     parser.add_argument("--env", default=DEFAULT_ENV_NAME,
                         help="Name of the environment, default=" + DEFAULT_ENV_NAME)
     parser.add_argument("--reward", type=float, default=MEAN_REWARD_BOUND,
@@ -136,6 +138,7 @@ if __name__ == "__main__":
 
         reward = agent.play_step(net, epsilon, device=device)
         if reward is not None:
+            # game finished
             total_rewards.append(reward)
             speed = (frame_idx - ts_frame) / (time.time() - ts)
             ts_frame = frame_idx

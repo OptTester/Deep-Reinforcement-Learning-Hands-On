@@ -22,7 +22,7 @@ BATCH_SIZE = 128
 REWARD_STEPS = 4
 CLIP_GRAD = 0.1
 
-PROCESSES_COUNT = 4
+PROCESSES_COUNT = 12 #4
 NUM_ENVS = 15
 
 if True:
@@ -37,6 +37,7 @@ else:
 
 def make_env():
     return ptan.common.wrappers.wrap_dqn(gym.make(ENV_NAME))
+
 
 TotalReward = collections.namedtuple('TotalReward', field_names='reward')
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     mp.set_start_method('spawn')
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
-    parser.add_argument("-n", "--name", required=True, help="Name of the run")
+    parser.add_argument("-n", "--name", default="data_test", required=False, help="Name of the run")
     args = parser.parse_args()
     device = "cuda" if args.cuda else "cpu"
 
@@ -116,13 +117,13 @@ if __name__ == "__main__":
                     nn_utils.clip_grad_norm_(net.parameters(), CLIP_GRAD)
                     optimizer.step()
 
-                    tb_tracker.track("advantage", adv_v, step_idx)
-                    tb_tracker.track("values", value_v, step_idx)
-                    tb_tracker.track("batch_rewards", vals_ref_v, step_idx)
-                    tb_tracker.track("loss_entropy", entropy_loss_v, step_idx)
-                    tb_tracker.track("loss_policy", loss_policy_v, step_idx)
-                    tb_tracker.track("loss_value", loss_value_v, step_idx)
-                    tb_tracker.track("loss_total", loss_v, step_idx)
+                    tb_tracker.track("advantage", adv_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("values", value_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("batch_rewards", vals_ref_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("loss_entropy", entropy_loss_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("loss_policy", loss_policy_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("loss_value", loss_value_v.detach().cpu().numpy(), step_idx)
+                    tb_tracker.track("loss_total", loss_v.detach().cpu().numpy(), step_idx)
     finally:
         for p in data_proc_list:
             p.terminate()

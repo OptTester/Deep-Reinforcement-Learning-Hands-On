@@ -16,7 +16,7 @@ REWARD_STEPS_DEFAULT = 2
 if __name__ == "__main__":
     params = common.HYPERPARAMS['pong']
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
+    parser.add_argument("--cuda", default=True, action="store_true", help="Enable cuda")
     parser.add_argument("-n", default=REWARD_STEPS_DEFAULT, type=int, help="Count of steps to unroll Bellman")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")

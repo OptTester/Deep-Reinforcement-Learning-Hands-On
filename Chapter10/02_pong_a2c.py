@@ -94,8 +94,8 @@ def unpack_batch(batch, net, device='cpu'):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
-    parser.add_argument("-n", "--name", required=True, help="Name of the run")
+    parser.add_argument("--cuda", default=True, action="store_true", help="Enable cuda")
+    parser.add_argument("-n", "--name", default="pong_test", required=False, help="Name of the run")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
@@ -156,13 +156,13 @@ if __name__ == "__main__":
                 # get full loss
                 loss_v += loss_policy_v
 
-                tb_tracker.track("advantage",       adv_v, step_idx)
-                tb_tracker.track("values",          value_v, step_idx)
-                tb_tracker.track("batch_rewards",   vals_ref_v, step_idx)
-                tb_tracker.track("loss_entropy",    entropy_loss_v, step_idx)
-                tb_tracker.track("loss_policy",     loss_policy_v, step_idx)
-                tb_tracker.track("loss_value",      loss_value_v, step_idx)
-                tb_tracker.track("loss_total",      loss_v, step_idx)
+                tb_tracker.track("advantage",       adv_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("values",          value_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("batch_rewards",   vals_ref_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("loss_entropy",    entropy_loss_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("loss_policy",     loss_policy_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("loss_value",      loss_value_v.detach().cpu().numpy(), step_idx)
+                tb_tracker.track("loss_total",      loss_v.detach().cpu().numpy(), step_idx)
                 tb_tracker.track("grad_l2",         np.sqrt(np.mean(np.square(grads))), step_idx)
                 tb_tracker.track("grad_max",        np.max(np.abs(grads)), step_idx)
                 tb_tracker.track("grad_var",        np.var(grads), step_idx)

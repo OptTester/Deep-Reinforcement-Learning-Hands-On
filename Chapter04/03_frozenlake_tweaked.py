@@ -52,10 +52,12 @@ def iterate_batches(env, net, batch_size):
     episode_steps = []
     obs = env.reset()
     sm = nn.Softmax(dim=1)
+    device = torch.device("cuda")
     while True:
-        obs_v = torch.FloatTensor([obs])
+        obs_v = torch.FloatTensor([obs]).to(device)
         act_probs_v = sm(net(obs_v))
-        act_probs = act_probs_v.data.numpy()[0]
+        #act_probs = act_probs_v.data.numpy()[0]
+        act_probs = act_probs_v.cpu().data.numpy()[0]
         action = np.random.choice(len(act_probs), p=act_probs)
         next_obs, reward, is_done, _ = env.step(action)
         episode_reward += reward
@@ -94,7 +96,8 @@ if __name__ == "__main__":
     obs_size = env.observation_space.shape[0]
     n_actions = env.action_space.n
 
-    net = Net(obs_size, HIDDEN_SIZE, n_actions)
+    device = torch.device("cuda")
+    net = Net(obs_size, HIDDEN_SIZE, n_actions).to(device)
     objective = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=net.parameters(), lr=0.001)
     writer = SummaryWriter(comment="-frozenlake-tweaked")
@@ -105,8 +108,8 @@ if __name__ == "__main__":
         full_batch, obs, acts, reward_bound = filter_batch(full_batch + batch, PERCENTILE)
         if not full_batch:
             continue
-        obs_v = torch.FloatTensor(obs)
-        acts_v = torch.LongTensor(acts)
+        obs_v = torch.FloatTensor(obs).to(device)
+        acts_v = torch.LongTensor(acts).to(device)
         full_batch = full_batch[-500:]
 
         optimizer.zero_grad()

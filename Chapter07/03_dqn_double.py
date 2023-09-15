@@ -23,9 +23,10 @@ def calc_loss(batch, net, tgt_net, gamma, device="cpu", double=True):
     next_states_v = torch.tensor(next_states).to(device)
     actions_v = torch.tensor(actions).to(device)
     rewards_v = torch.tensor(rewards).to(device)
-    done_mask = torch.ByteTensor(dones).to(device)
+    # done_mask = torch.ByteTensor(dones).to(device)
+    done_mask = torch.BoolTensor(dones).to(device)
 
-    state_action_values = net(states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
+    state_action_values = net(states_v).gather(1, actions_v.type(torch.int64).unsqueeze(-1)).squeeze(-1)
     if double:
         next_state_actions = net(next_states_v).max(1)[1]
         next_state_values = tgt_net(next_states_v).gather(1, next_state_actions.unsqueeze(-1)).squeeze(-1)
@@ -50,8 +51,8 @@ def calc_values_of_states(states, net, device="cpu"):
 if __name__ == "__main__":
     params = common.HYPERPARAMS['pong']
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
-    parser.add_argument("--double", default=False, action="store_true", help="Enable double DQN")
+    parser.add_argument("--cuda", default=True, action="store_true", help="Enable cuda")
+    parser.add_argument("--double", default=True, action="store_true", help="Enable double DQN")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
